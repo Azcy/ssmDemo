@@ -5,82 +5,47 @@
     <title>Title</title>
     <script src="https://cdn.wincustomer.net/js/jquery-2.2.4.min.js"></script>
     <script type="text/javascript">
-        function savePic(){
-            var formData = new FormData();
-            formData.append("file",$("#uploadPic")[0]);
-            var ajaxUrl = "http://localhost:8080/saveHeaderPic";
-
-
-            var xhr =new XMLHttpRequest();
-            xhr.open("POST",ajaxUrl);
-            xhr.send(formData);
-            xhr.onreadystatechange=function(evt)
-            {
-                if (evt.currentTarget.readyState ==4 && evt.currentTarget.status ==200 )
-                {
-                    var sendPayData = JSON.parse(evt.currentTarget.responseText);
-                    document.getElementById("mediaId").value=sendPayData.media_id;
-                    console.log(sendPayData.media_id);
-                }else{
-                    console.log(evt.currentTarget.readyState);
-                }
-            };
-            //alert(ajaxUrl);
-            //$('#uploadPic').serialize() 无法序列化二进制文件，这里采用formData上传
-            //需要浏览器支持：Chrome 7+、Firefox 4+、IE 10+、Opera 12+、Safari 5+。
-           /* $.ajax({
-                type: "POST",
-                //dataType: "text",
-                url: ajaxUrl,
-                data: formData,
-                async: false,
-                cache: false,
-                contentType: false,
-                processData: false,
-                success: function (data) {
-                    alert(data);
-                },
-                error: function(data) {
-                    alert("error:"+data.responseText);
-
-                }
-            });*/
-            return false;
-        }
-
-
-
-
-        function ajaxFileUpload() {
+        /*
+         * 上传文件
+         */
+        function upload(){
+            var formData = new FormData($( "#uploadfiles" )[0]);
             $.ajax({
-                url: 'http://localhost:8080/uploadPic', //服务器端请求地址
-                secureuri: false, //是否需要安全协议，一般设置为false
-                fileElementId: 'uploadFile', //文件上传域的ID
-                dataType: 'json', //返回值类型 一般设置为json
-                enctype:'multipart/form-data',//注意一定要有该参数
-                success: function (data, status)  //服务器成功响应处理函数
-                {
-                    alert(data);       //data是从服务器返回来的值
-                    alert('上传图片成功!图片地址'+'http://localhost:8080' + "/upload/"+data);
-                    $("#imghead").attr("src", 'http://localhost:8080' + "/upload/"+data);
+                type: "post",
+                url: "./upload",
+                dataType: "json",
+                data: formData,
+
+                /**
+                 *必须false才会自动加上正确的Content-Type
+                 */
+                contentType : false,
+                /**
+                 * 必须false才会避开jQuery对 formdata 的默认处理
+                 * XMLHttpRequest会对 formdata 进行正确的处理
+                 */
+                processData : false,
+                success: function(data){//从后端返回数据进行处理
+                    if(data){
+                        alert("上传成功！");
+                    }else{
+                        alert("上传失败！");
+                    }
                 },
-                error: function (data, status, e)//服务器响应失败处理函数
-                {
-                    alert(e);
+                error: function(err) {//提交出错
+                    $("#msg").html(JSON.stringify(err));//打出响应信息
+                    alert("服务器无响应");
                 }
-            })
+            });
         }
     </script>
 </head>
 <body>
 <form id="uploadPic" action="#" enctype="multipart/form-data">
-    <input type="file" name="filename" >
-    <a href="javascript:savePic();" class="btn green"> 提交 </a>
-
-
-    <div class="wl-box">
-        <input type="file" id="uploadFile" name="file" onchange="ajaxFileUpload()" />
-    </div>
+    <form id="uploadfiles" enctype="multipart/form-data">
+        <input type="file" multiple="multiple" id="file_upload" name="file_upload" />
+        <input type="button" value="上传" onclick="upload()" />
+    </form>
 </form>
 </body>
 </html>

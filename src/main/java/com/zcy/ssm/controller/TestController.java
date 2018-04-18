@@ -16,52 +16,26 @@ import java.util.Date;
 
 @Controller
 public class TestController {
-    @RequestMapping(value = "/saveHeaderPic", method = RequestMethod.POST)
-    public void saveHeaderPic(@RequestParam("file") CommonsMultipartFile file, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    @RequestMapping(value = "/upload", produces = "application/json;charset=UTF-8")
+    public @ResponseBody
+    boolean uploadFiles(@RequestParam("file_upload") MultipartFile[] files) {
+        boolean result = false;
+        String realPath;
+        for (int i = 0; i < files.length; i++) {
+            if (!files[i].isEmpty()) {
+                String uniqueName = files[i].getOriginalFilename();//得到文件名
+                realPath = "/tmp/upload/" + File.separator + uniqueName;//文件上传的路径
+                try {
+                    files[i].transferTo(new File(realPath));  // 转存文件
 
-        System.out.println("/saveHeaderPic");
-        String resMsg = "";
-        try {
-
-            long  startTime=System.currentTimeMillis();
-
-            System.out.println("fileName："+file.getOriginalFilename());
-            String path="./"+new Date().getTime()+file.getOriginalFilename();
-            System.out.println("path:" + path);
-
-            File newFile=new File(path);
-            //通过CommonsMultipartFile的方法直接写文件
-            file.transferTo(newFile);
-            long  endTime=System.currentTimeMillis();
-            System.out.println("运行时间："+String.valueOf(endTime-startTime)+"ms");
-            resMsg = "1";
-        } catch (IllegalStateException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            resMsg = "0";
+                    result = true;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
-        response.getWriter().write(resMsg);
 
-    }
-
-
-    @RequestMapping("/uploadPic")
-    @ResponseBody
-    public String uploadPic(@RequestParam(value = "file", required = false) MultipartFile file, HttpServletRequest request) throws Exception {
-        String path = request.getSession().getServletContext().getRealPath("upload");
-        String fileName = file.getOriginalFilename();
-        String fileNameStr = (new Date().getTime())+"__"+fileName;
-        File targetFile = new File(path, fileNameStr);
-        if(!targetFile.exists()){
-            targetFile.mkdirs();
-        }
-        //保存
-        try {
-            file.transferTo(targetFile);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return fileNameStr;
-    }
+    return result;
+}
 
 }
