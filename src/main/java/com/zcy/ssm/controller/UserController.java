@@ -28,7 +28,7 @@ public class UserController {
 	/**
 	 * 处理/login请求
 	 * */
-	@RequestMapping(value="/login")
+	@RequestMapping(value="/content/login")
 	 public ModelAndView login(
 			 String loginname,String password,
 			 ModelAndView mv,
